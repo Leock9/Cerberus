@@ -1,0 +1,93 @@
+service: poc-lambda-net   
+frameworkVersion: '3'
+
+plugins:
+  - serverless-localstack
+
+provider:
+  name: aws
+  runtime: dotnet6
+  stage: ${opt:stage,'local'}
+  region: us-east-1
+  deploymentPrefix: serverless
+
+functions:
+  Cerberus:
+    handler: Cerberus:::Lambda.Function::FunctionHandler
+    events:
+      - http:
+          path: auth/validate-cpf
+          method: post
+          cors: true
+    environment:
+      COGNITO_USER_POOL_ID: ${self:custom.cognito.userPoolId}
+      COGNITO_CLIENT_ID: ${self:custom.cognito.clientId}
+      COGNITO_CLIENT_SECRET: ${self:custom.cognito.clientSecret}
+      COGNITO_REGION: ${self:custom.cognito.region}
+
+custom:
+  localstack:
+    stages:
+      - local
+    debug: true
+    host: http://localhost  # optional - LocalStack host to connect to
+    edgePort: 4566  # optional - LocalStack edge port to connect to
+    autostart: true  # optional - Start LocalStack in Docker on Serverless deploy
+    networks: #optional - attaches the list of networks to the localstack docker container after startup
+      - host
+    lambda:
+      # Enable this flag to improve performance
+      mountCode: False
+    docker:
+      # Enable this flag to run "docker ..." commands as sudo
+      sudo: False
+  local:
+    logRetentionInDays: 1
+    domainName: localhost
+  dev:
+    logRetentionInDays: 7
+    logisticId: "88"
+  cognito:
+    userPoolId: <USER_POOL_ID>
+    clientId: <CLIENT_ID>
+    clientSecret: <CLIENT_SECRET>
+    region: us-east-1
+
+package:
+  individually: true
+
+resources:
+  Resources:
+    ApiGatewayRestApi:
+      Type: 'AWS::ApiGateway::RestApi'
+      Properties:
+        Name: 'CPF Validator API'
+        Description: 'API for validating CPF and creating Cognito users'
+    ApiGatewayResource:
+      Type: 'AWS::ApiGateway::Resource'
+      Properties:
+        RestApiId:!Ref ApiGatewayRestApi
+        ParentId:!GetAtt ApiGatewayRestApi.RootResourceId
+        PathPart: 'auth'
+    ApiGatewayMethod:
+      Type: 'AWS::ApiGateway::Method'
+      Properties:
+        RestApiId:!Ref ApiGatewayRestApi
+        ResourceId:!Ref ApiGatewayResource
+        HttpMethod: 'POST'
+        AuthorizationType: 'NONE'
+        Integration:
+          Type: 'AWS_PROXY'
+          IntegrationHttpMethod: 'POST'
+          Uri:!Sub 
+            - 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations'
+            - LambdaArn:!GetAtt 
+                - Cerberus
+                - Arn
+    ApiGatewayDeployment:
+      Type: 'AWS::ApiGateway::Deployment'
+      DependsOn:
+        - ApiGatewayMethod
+      Properties:
+        RestApiId:!Ref ApiGatewayRestApi
+        StageName: 'dev'
