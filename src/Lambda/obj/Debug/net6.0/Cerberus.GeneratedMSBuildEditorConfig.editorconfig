@@ -8,6 +8,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = poc_lambda_net
-build_property.ProjectDir = C:\Repos\Cerberus\src\Lambda\
+build_property.ProjectDir = c:\Repos\Cerberus\src\Lambda\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 

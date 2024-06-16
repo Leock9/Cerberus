@@ -1,63 +1,54 @@
-﻿using Amazon.CognitoIdentityProvider;
-using Amazon.CognitoIdentityProvider.Model;
-using Amazon.Lambda.APIGatewayEvents;
-using Amazon.Lambda.Core;
+﻿using System;
 using System.Threading.Tasks;
+using Amazon.CognitoIdentityProvider;
+using Amazon.CognitoIdentityProvider.Model;
+using Amazon.Lambda.Core;
+using Amazon.Lambda.SQSEvents;
+using Amazon.SQS;
+using Amazon.SQS.Model;
+using Newtonsoft.Json.Linq;
 
+// Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
-namespace Lambda;
 
+namespace Lambda;
 public class Function
 {
-    private readonly AmazonCognitoIdentityProviderClient _cognitoClient;
+    private static readonly AmazonCognitoIdentityProviderClient _cognitoClient = new AmazonCognitoIdentityProviderClient();
+    private static readonly string _userPoolId = Environment.GetEnvironmentVariable("COGNITO_USER_POOL_ID");
 
-    public Function()
+    public async Task FunctionHandler(SQSEvent sqsEvent, ILambdaContext context)
     {
-        _cognitoClient = new AmazonCognitoIdentityProviderClient(new AmazonCognitoIdentityProviderConfig
+        foreach (var record in sqsEvent.Records)
         {
-            RegionEndpoint = RegionEndpoint.USEast1
-        });
-    }
+            var cpf = record.Body;
 
-    public async Task<APIGatewayHttpApiV2ProxyResponse> FunctionHandler(APIGatewayHttpApiV2ProxyRequest request, ILambdaContext context)
-    {
-        context.Logger.LogInformation("Starting function execution.");
+            context.Logger.LogLine($"Processing CPF: {cpf}");
 
-        var requestBody = request.Body;
-        var requestBodyJson = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(requestBody);
-        var username = requestBodyJson["username"];
-        var password = requestBodyJson["password"];
-
-        var authRequest = new AdminInitiateAuthRequest
-        {
-            UserPoolId = "your-user-pool-id",
-            ClientId = "your-client-id",
-            AuthFlow = AuthFlowType.ADMIN_NO_SRP_AUTH,
-            AuthParameters = new Dictionary<string, string>
+            try
             {
-                { "USERNAME", username },
-                { "PASSWORD", password }
-            }
-        };
-        var authResponse = await _cognitoClient.AdminInitiateAuthAsync(authRequest);
+                var request = new AdminCreateUserRequest
+                {
+                    UserPoolId = _userPoolId,
+                    Username = cpf,
+                    UserAttributes = new List<AttributeType>
+                        {
+                            new AttributeType
+                            {
+                                Name = "custom:cpf",
+                                Value = cpf
+                            }
+                        }
+                };
 
-        var responseBody = new Dictionary<string, string>
-        {
-            { "token", authResponse.AuthenticationResult.IdToken }
-        };
-        
-        var responseBodyJson = System.Text.Json.JsonSerializer.Serialize(responseBody);
-        var response = new APIGatewayHttpApiV2ProxyResponse
-        {
-            StatusCode = 200,
-            Body = responseBodyJson,
-            Headers = new Dictionary<string, string>
+                var response = await _cognitoClient.AdminCreateUserAsync(request);
+
+                context.Logger.LogLine($"User {cpf} created successfully.");
+            }
+            catch (Exception ex)
             {
-                { "Content-Type", "application/json" }
+                context.Logger.LogLine($"Error creating user: {ex.Message}");
             }
-        };
-
-        context.Logger.LogInformation("Function execution complete.");
-        return response;
+        }
     }
 }
