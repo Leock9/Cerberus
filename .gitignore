@@ -25,6 +25,8 @@ src/.serverless/
 *.user
 *.userosscache
 *.sln.docstates
+*.editorconfig
+*.cache
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -608,3 +610,4 @@ FodyWeavers.xsd
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,visualstudio,csharp
 
+src/Lambda/obj/Debug/net6.0/Cerberus.AssemblyInfo.cs

@@ -5,18 +5,13 @@ public interface ICreateClientUseCase
     Task ExecuteAsync(CreateClientInput input);
 }
 
-public class CreateClientUseCase : ICreateClientUseCase
+public class CreateClientUseCase(IClientGateway clientGateway) : ICreateClientUseCase
 {
-    private readonly IClientGateway _clientGateway;
-
-    public CreateClientUseCase(IClientGateway clientGateway)
-    {
-        _clientGateway = clientGateway;
-    }
+    private readonly IClientGateway _clientGateway = clientGateway;
 
     public async Task ExecuteAsync(CreateClientInput input)
     {
         var client = new Client(input.Name, input.Document, input.Email);
-        await _clientGateway.Create(client);
+        await _clientGateway.SaveAsync(client);
     }
 }

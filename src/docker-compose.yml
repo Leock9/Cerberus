@@ -1,4 +1,4 @@
-name: inventory-service
+name: cerberus-api
 services:
 
   localstack:
@@ -18,3 +18,18 @@ services:
       - "${LOCALSTACK_VOLUME_DIR:-./localstack-volume}:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "./localstack-init:/etc/localstack/init/ready.d"
+
+  cerberus-api:
+    container_name: cerberus-api
+    image: lkhouri/cerberus-api:latest
+    ports:
+     - "5000:80"
+    build:
+      context: .
+      dockerfile: Api\Dockerfile
+    environment:
+      LocalStack__Config__LocalStackHost: 'localstack'
+    depends_on:
+      - localstack
+    volumes:
+     - ./Api/Cerberus.Api:/appsettings.json

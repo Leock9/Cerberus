@@ -1,12 +1,7 @@
-﻿using System;
-using System.Threading.Tasks;
-using Amazon.CognitoIdentityProvider;
+﻿using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.SQSEvents;
-using Amazon.SQS;
-using Amazon.SQS.Model;
-using Newtonsoft.Json.Linq;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]

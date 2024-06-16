@@ -7,11 +7,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E16C061E-3F7
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Lambda", "Lambda", "{ECC02272-A1A1-413B-A6CD-7A00ADCC38B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cerberus", "src\Lambda\Cerberus.csproj", "{F3108A95-5DC0-4755-AFDF-46833EDA26A8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cerberus", "src\Lambda\Cerberus.csproj", "{F3108A95-5DC0-4755-AFDF-46833EDA26A8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Api", "Api", "{E2A6313B-5344-4910-BD01-72D040067FAD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cerberus.Api", "src\Api\Cerberus.Api\Cerberus.Api.csproj", "{AF7DF6F1-2832-48BE-8AD0-F220D6CB5EFB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cerberus.Api", "src\Api\Cerberus.Api\Cerberus.Api.csproj", "{AF7DF6F1-2832-48BE-8AD0-F220D6CB5EFB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cerberus.Api.Tests", "Cerberus.Api.Tests\Cerberus.Api.Tests.csproj", "{E825A7DC-CF33-4C6D-B05C-C1064B5BA010}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{AF7DF6F1-2832-48BE-8AD0-F220D6CB5EFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AF7DF6F1-2832-48BE-8AD0-F220D6CB5EFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AF7DF6F1-2832-48BE-8AD0-F220D6CB5EFB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E825A7DC-CF33-4C6D-B05C-C1064B5BA010}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E825A7DC-CF33-4C6D-B05C-C1064B5BA010}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E825A7DC-CF33-4C6D-B05C-C1064B5BA010}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E825A7DC-CF33-4C6D-B05C-C1064B5BA010}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -36,5 +42,9 @@ Global
 		{F3108A95-5DC0-4755-AFDF-46833EDA26A8} = {ECC02272-A1A1-413B-A6CD-7A00ADCC38B6}
 		{E2A6313B-5344-4910-BD01-72D040067FAD} = {E16C061E-3F7B-4B2E-A14C-315D40B125CC}
 		{AF7DF6F1-2832-48BE-8AD0-F220D6CB5EFB} = {E2A6313B-5344-4910-BD01-72D040067FAD}
+		{E825A7DC-CF33-4C6D-B05C-C1064B5BA010} = {E2A6313B-5344-4910-BD01-72D040067FAD}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A65D8BF3-C230-4C47-9A19-2406EF554448}
 	EndGlobalSection
 EndGlobal

@@ -2,7 +2,7 @@
 
 public interface IClientGateway
 {
-    void Create(Client client);
+    Task SaveAsync(Client client);
 
-    Task<Client> GetByDocumentAsync(string document);
+    Task<Client?> GetByDocumentAsync(string document);
 }
