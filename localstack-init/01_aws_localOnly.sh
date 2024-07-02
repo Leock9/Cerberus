@@ -1,1 +1,3 @@
-awslocal sqs create-queue --queue-name clients-local
+#!/bin/bash
+
+awslocal sqs create-queue --queue-name client
