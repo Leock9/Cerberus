@@ -1,0 +1,70 @@
+service: cerberus-lambda  
+frameworkVersion: '3'
+
+plugins:
+  - serverless-localstack
+
+provider:
+  name: aws
+  runtime: dotnet6
+  stage: ${opt:stage,'local'}
+  region: us-east-1
+  deploymentPrefix: serverless
+  architecture: arm64
+
+iam:
+  role:
+    statements:
+      - Effect: "Allow"
+        Action:
+          - "sqs:*"
+        Resource: 
+          - !GetAtt ClientQueue.Arn 
+
+custom:
+  localstack:
+    stages:
+      - local
+    debug: true
+    host: http://localhost  # optional - LocalStack host to connect to
+    edgePort: 4566  # optional - LocalStack edge port to connect to
+    autostart: true  # optional - Start LocalStack in Docker on Serverless deploy
+    networks: #optional - attaches the list of networks to the localstack docker container after startup
+      - host
+    lambda:
+      # Enable this flag to improve performance
+      mountCode: False
+    docker:
+      # Enable this flag to run "docker ..." commands as sudo
+      sudo: False
+  local:
+    logRetentionInDays: 1
+    domainName: localhost
+  dev:
+    logRetentionInDays: 7
+    logisticId: "88"
+package:
+  individually: true
+
+functions:
+  myFunction:
+    handler: Cerberus::Cerberus.Functions::FunctionHandler
+    memorySize: 1024 # Ajuste isso conforme necessário
+    timeout: 900 # Ajuste isso conforme necessário
+    package:
+      artifact: ./src/Cerberus/Cerberus.zip
+    events:
+      - sqs:
+          arn: !GetAtt ClientQueue.Arn 
+          batchSize: 10
+
+resources:
+  Resources:
+    ClientQueue:
+      Type: AWS::SQS::Queue
+      DeletionPolicy: Delete
+      Properties:
+        QueueName: client
+        ReceiveMessageWaitTimeSeconds: 20
+        RedrivePolicy:
+          maxReceiveCount: 2

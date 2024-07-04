@@ -9,12 +9,11 @@ services:
       - "127.0.0.1:4510-4559:4510-4559" # external services port range
     environment:
       - AWS_DEFAULT_REGION=us-east-1
-      - SERVICES=lambda,sqs,s3, dynamodb # Para obter lista completa => http GET http://127.0.0.1:4566/_localstack/health
+      - SERVICES=lambda,sns,sqs,s3,cloudformation,cloudwatch,sts,ssm,iam,apigateway,secretsmanager,logs,events,stepfunctions # Para obter lista completa => http GET http://127.0.0.1:4566/_localstack/health
       - EXTRA_CORS_ALLOWED_ORIGINS=https://app.localstack.cloud. # Enable access from the dashboard
     volumes:
       - "./localstack-volume:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - "./localstack-init:/etc/localstack/init/ready.d"
 
   gate.api:
     image: ${DOCKER_REGISTRY-}gateapi
