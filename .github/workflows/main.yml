@@ -25,4 +25,4 @@ jobs:
       run: dotnet build Cerberus.sln --no-restore
 
     - name: Run tests
-      run: dotnet test Cerberus.Api.Tests/Cerberus.Api.Tests.csproj --no-build
+      run: dotnet test Gate.Api.Tests/Gate.Api.Tests.csproj --no-build
