@@ -11,6 +11,14 @@
       "region": "us-east-1",
       "deploymentPrefix": "serverless",
       "architecture": "arm64",
+      "environment": {
+        "UserPoolId": {
+          "Ref": "CognitoUserPool"
+        },
+        "UserPoolClientId": {
+          "Ref": "CognitoUserPoolClient"
+        }
+      },
       "versionFunctions": true,
       "compiledCloudFormationTemplate": {
         "AWSTemplateFormatVersion": "2010-09-09",
@@ -85,10 +93,10 @@
               }
             }
           },
-          "MyFunctionLogGroup": {
+          "CerberusFunctionLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/cerberus-lambda-local-myFunction"
+              "LogGroupName": "/aws/lambda/cerberus-lambda-local-CerberusFunction"
             }
           },
           "IamRoleLambdaExecution": {
@@ -185,23 +193,33 @@
               }
             }
           },
-          "MyFunctionLambdaFunction": {
+          "CerberusFunctionLambdaFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
               "Code": {
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/cerberus-lambda/local/1720058943027-2024-07-04T02:09:03.027Z/./src/Cerberus/Cerberus.zip"
+                "S3Key": "serverless/cerberus-lambda/local/1720380041637-2024-07-07T19:20:41.637Z/./src/Cerberus/Cerberus.zip"
               },
-              "Handler": "Cerberus::Cerberus.Functions::FunctionHandler",
+              "Handler": "Cerberus::Cerberus.Function::FunctionHandler",
               "Runtime": "dotnet6",
-              "FunctionName": "cerberus-lambda-local-myFunction",
+              "FunctionName": "cerberus-lambda-local-CerberusFunction",
               "MemorySize": 1024,
               "Timeout": 900,
               "Architectures": [
                 "arm64"
               ],
+              "Environment": {
+                "Variables": {
+                  "UserPoolId": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"UserPoolId\"]"
+                  },
+                  "UserPoolClientId": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"UserPoolClientId\"]"
+                  }
+                }
+              },
               "Role": {
                 "Fn::GetAtt": [
                   "IamRoleLambdaExecution",
@@ -210,20 +228,20 @@
               }
             },
             "DependsOn": [
-              "MyFunctionLogGroup"
+              "CerberusFunctionLogGroup"
             ]
           },
-          "MyFunctionLambdaVersionjuIWXRlxrsFGfMC9e2nOngTKNFox0u0Djp8qTEs": {
+          "CerberusFunctionLambdaVersionqxLhZj4jqrvOddbFCFBgDJYqVjlijByVmg52EJHt0E": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
-                "Ref": "MyFunctionLambdaFunction"
+                "Ref": "CerberusFunctionLambdaFunction"
               },
-              "CodeSha256": "ckXV5bLVBmvVCfDSiQw5IZYELEp5IywyQAlJ4/XMlx4="
+              "CodeSha256": "xi7vWQz05cTvTKvkX0JBkWSrSc011nO76QCQlDlS02Q="
             }
           },
-          "MyFunctionEventSourceMappingSQSClientQueue": {
+          "CerberusFunctionEventSourceMappingSQSClientQueue": {
             "Type": "AWS::Lambda::EventSourceMapping",
             "DependsOn": [
               "IamRoleLambdaExecution"
@@ -238,7 +256,7 @@
               },
               "FunctionName": {
                 "Fn::GetAtt": [
-                  "MyFunctionLambdaFunction",
+                  "CerberusFunctionLambdaFunction",
                   "Arn"
                 ]
               },
@@ -252,8 +270,55 @@
               "QueueName": "client",
               "ReceiveMessageWaitTimeSeconds": 20,
               "RedrivePolicy": {
-                "maxReceiveCount": 2
+                "maxReceiveCount": 2,
+                "deadLetterTargetArn": {
+                  "Fn::GetAtt": [
+                    "ClientDeadLetterQueue",
+                    "Arn"
+                  ]
+                }
               }
+            }
+          },
+          "ClientDeadLetterQueue": {
+            "Type": "AWS::SQS::Queue",
+            "DeletionPolicy": "Delete",
+            "Properties": {
+              "QueueName": "client-dlq",
+              "ReceiveMessageWaitTimeSeconds": 20
+            }
+          },
+          "CognitoUserPool": {
+            "Type": "AWS::Cognito::UserPool",
+            "Properties": {
+              "UserPoolName": "cerberus-user-pool",
+              "AutoVerifiedAttributes": [
+                "email"
+              ],
+              "Schema": [
+                {
+                  "Name": "email",
+                  "Required": true,
+                  "Mutable": true
+                },
+                {
+                  "Name": "cpf",
+                  "Required": false,
+                  "Mutable": true
+                }
+              ]
+            }
+          },
+          "CognitoUserPoolClient": {
+            "Type": "AWS::Cognito::UserPoolClient",
+            "Properties": {
+              "ClientName": "cerberus-user-pool-client",
+              "UserPoolId": {
+                "Ref": "CognitoUserPool"
+              },
+              "ExplicitAuthFlows": [
+                "ADMIN_NO_SRP_AUTH"
+              ]
             }
           }
         },
@@ -266,13 +331,13 @@
               "Name": "sls-cerberus-lambda-local-ServerlessDeploymentBucketName"
             }
           },
-          "MyFunctionLambdaFunctionQualifiedArn": {
+          "CerberusFunctionLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "MyFunctionLambdaVersionjuIWXRlxrsFGfMC9e2nOngTKNFox0u0Djp8qTEs"
+              "Ref": "CerberusFunctionLambdaVersionqxLhZj4jqrvOddbFCFBgDJYqVjlijByVmg52EJHt0E"
             },
             "Export": {
-              "Name": "sls-cerberus-lambda-local-MyFunctionLambdaFunctionQualifiedArn"
+              "Name": "sls-cerberus-lambda-local-CerberusFunctionLambdaFunctionQualifiedArn"
             }
           }
         }
@@ -394,8 +459,8 @@
     ],
     "pluginsData": {},
     "functions": {
-      "myFunction": {
-        "handler": "Cerberus::Cerberus.Functions::FunctionHandler",
+      "CerberusFunction": {
+        "handler": "Cerberus::Cerberus.Function::FunctionHandler",
         "memorySize": 1024,
         "timeout": 900,
         "package": {
@@ -411,11 +476,11 @@
             }
           }
         ],
-        "name": "cerberus-lambda-local-myFunction",
+        "name": "cerberus-lambda-local-CerberusFunction",
         "memory": 1024,
         "runtime": "dotnet6",
         "vpc": {},
-        "versionLogicalId": "MyFunctionLambdaVersionjuIWXRlxrsFGfMC9e2nOngTKNFox0u0Djp8qTEs"
+        "versionLogicalId": "CerberusFunctionLambdaVersionqxLhZj4jqrvOddbFCFBgDJYqVjlijByVmg52EJHt0E"
       }
     },
     "resources": {
@@ -427,8 +492,55 @@
             "QueueName": "client",
             "ReceiveMessageWaitTimeSeconds": 20,
             "RedrivePolicy": {
-              "maxReceiveCount": 2
+              "maxReceiveCount": 2,
+              "deadLetterTargetArn": {
+                "Fn::GetAtt": [
+                  "ClientDeadLetterQueue",
+                  "Arn"
+                ]
+              }
             }
+          }
+        },
+        "ClientDeadLetterQueue": {
+          "Type": "AWS::SQS::Queue",
+          "DeletionPolicy": "Delete",
+          "Properties": {
+            "QueueName": "client-dlq",
+            "ReceiveMessageWaitTimeSeconds": 20
+          }
+        },
+        "CognitoUserPool": {
+          "Type": "AWS::Cognito::UserPool",
+          "Properties": {
+            "UserPoolName": "cerberus-user-pool",
+            "AutoVerifiedAttributes": [
+              "email"
+            ],
+            "Schema": [
+              {
+                "Name": "email",
+                "Required": true,
+                "Mutable": true
+              },
+              {
+                "Name": "cpf",
+                "Required": false,
+                "Mutable": true
+              }
+            ]
+          }
+        },
+        "CognitoUserPoolClient": {
+          "Type": "AWS::Cognito::UserPoolClient",
+          "Properties": {
+            "ClientName": "cerberus-user-pool-client",
+            "UserPoolId": {
+              "Ref": "CognitoUserPool"
+            },
+            "ExplicitAuthFlows": [
+              "ADMIN_NO_SRP_AUTH"
+            ]
           }
         }
       },
@@ -459,6 +571,32 @@
                     "ClientQueue",
                     "Arn"
                   ]
+                },
+                {
+                  "Fn::GetAtt": [
+                    "ClientDeadLetterQueue",
+                    "Arn"
+                  ]
+                }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "cognito-idp:*"
+              ],
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "CognitoUserPool",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::GetAtt": [
+                    "CognitoUserPoolClient",
+                    "Arn"
+                  ]
                 }
               ]
             }
@@ -471,21 +609,42 @@
       "package": {
         "individually": true,
         "artifactsS3KeyDirname": "serverless/cerberus-lambda/local/code-artifacts",
-        "artifactDirectoryName": "serverless/cerberus-lambda/local/1720058943027-2024-07-04T02:09:03.027Z"
+        "artifactDirectoryName": "serverless/cerberus-lambda/local/1720380041637-2024-07-07T19:20:41.637Z"
       },
       "functions": {
         "$ref": "$[\"service\"][\"functions\"]"
       },
       "resources": {
         "$ref": "$[\"service\"][\"resources\"]"
+      },
+      "outputs": {
+        "UserPoolId": {
+          "Value": {
+            "Ref": "CognitoUserPool"
+          },
+          "Export": {
+            "Name": "UserPoolId"
+          }
+        },
+        "UserPoolClientId": {
+          "Value": {
+            "Ref": "CognitoUserPoolClient"
+          },
+          "Export": {
+            "Name": "UserPoolClientId"
+          }
+        }
       }
     },
     "layers": {},
+    "outputs": {
+      "$ref": "$[\"service\"][\"initialServerlessConfig\"][\"outputs\"]"
+    },
     "isDashboardMonitoringPreconfigured": false
   },
   "package": {
     "individually": true,
-    "artifactDirectoryName": "serverless/cerberus-lambda/local/1720058943027-2024-07-04T02:09:03.027Z",
+    "artifactDirectoryName": "serverless/cerberus-lambda/local/1720380041637-2024-07-07T19:20:41.637Z",
     "artifact": ""
   }
 }

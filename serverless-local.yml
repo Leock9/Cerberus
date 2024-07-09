@@ -11,15 +11,28 @@ provider:
   region: us-east-1
   deploymentPrefix: serverless
   architecture: arm64
+  environment:
+    UserPoolId:
+      Ref: CognitoUserPool
+    UserPoolClientId:
+      Ref: CognitoUserPoolClient
 
 iam:
   role:
     statements:
-      - Effect: "Allow"
+      - Effect: Allow
         Action:
           - "sqs:*"
         Resource: 
           - !GetAtt ClientQueue.Arn 
+          - !GetAtt ClientDeadLetterQueue.Arn
+      - Effect: Allow
+        Action:
+          - "cognito-idp:*"
+        Resource: 
+          - !GetAtt CognitoUserPool.Arn
+          - !GetAtt CognitoUserPoolClient.Arn
+
 
 custom:
   localstack:
@@ -43,12 +56,13 @@ custom:
   dev:
     logRetentionInDays: 7
     logisticId: "88"
+
 package:
   individually: true
 
 functions:
-  myFunction:
-    handler: Cerberus::Cerberus.Functions::FunctionHandler
+  CerberusFunction:
+    handler: Cerberus::Cerberus.Function::FunctionHandler
     memorySize: 1024 # Ajuste isso conforme necessário
     timeout: 900 # Ajuste isso conforme necessário
     package:
@@ -59,6 +73,18 @@ functions:
           batchSize: 10
 
 resources:
+  extensions:
+    IamRoleLambdaExecution:
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - "lambda.amazonaws.com"
+              Action:
+                - "sts:AssumeRole"
   Resources:
     ClientQueue:
       Type: AWS::SQS::Queue
@@ -68,3 +94,46 @@ resources:
         ReceiveMessageWaitTimeSeconds: 20
         RedrivePolicy:
           maxReceiveCount: 2
+          deadLetterTargetArn: !GetAtt ClientDeadLetterQueue.Arn
+
+    ClientDeadLetterQueue:
+      Type: AWS::SQS::Queue
+      DeletionPolicy: Delete
+      Properties:
+        QueueName: client-dlq
+        ReceiveMessageWaitTimeSeconds: 20
+
+    CognitoUserPool:
+      Type: AWS::Cognito::UserPool
+      Properties: 
+        UserPoolName: "cerberus-user-pool"
+        AutoVerifiedAttributes: 
+          - email
+        Schema:
+          - Name: "email"
+            Required: true
+            Mutable: true
+          - Name: "cpf"
+            Required: false
+            Mutable: true
+
+    CognitoUserPoolClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        ClientName: "cerberus-user-pool-client"
+        UserPoolId:
+          Ref: CognitoUserPool
+        ExplicitAuthFlows:
+          - ADMIN_NO_SRP_AUTH
+
+outputs:
+  UserPoolId:
+    Value:
+      Ref: CognitoUserPool
+    Export:
+      Name: UserPoolId
+  UserPoolClientId:
+    Value:
+      Ref: CognitoUserPoolClient
+    Export:
+      Name: UserPoolClientId
