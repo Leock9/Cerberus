@@ -40,7 +40,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Build the Docker image
-        working-directory: ./src/Api/Gate.Api/Dockerfile
+        working-directory: /src/Api/Gate.Api
         run: |
           docker build -f Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/cerberusapi:v1 .
 
