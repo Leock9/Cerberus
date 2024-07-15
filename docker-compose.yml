@@ -22,9 +22,8 @@ services:
      - "8080:8080"
     build:
       context: src
-      dockerfile: Api/Gate.Api/Dockerfile
+      dockerfile: Gate.Api/Dockerfile
     environment:
       LocalStack__Config__LocalStackHost: 'localstack'
     depends_on:
       - localstack
-
