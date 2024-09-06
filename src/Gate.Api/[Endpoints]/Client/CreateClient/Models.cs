@@ -10,6 +10,8 @@ public class Request
     public string Document { get; init; } = string.Empty;
 
     public string Email { get; init; } = string.Empty;
+
+    public string Address { get; init; } = string.Empty;
 }
 
 public class Validator : Validator<Request>
@@ -28,6 +30,10 @@ public class Validator : Validator<Request>
                             .NotEmpty()
                             .NotNull()
                             .EmailAddress();
+
+        RuleFor(x => x.Address)
+                            .NotEmpty()
+                            .NotNull();
     }
 }
 

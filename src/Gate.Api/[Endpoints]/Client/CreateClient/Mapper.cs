@@ -9,6 +9,7 @@ public class Mapper : Mapper<Request, Response, object>
     (
         r.Name,
         r.Document,
-        r.Email
+        r.Email,
+        r.Address
     );
 }

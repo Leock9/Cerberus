@@ -101,14 +101,22 @@ public class DynamoDbClientGateway : IClientGateway
 
     public async Task SaveAsync(Client client)
     {
-        var clientDocument = new ClientDocument
-        {
-           Id = client.Id.ToString(),
-           Document = client.Document,
-           Name = client.Name,
-           Email = client.Email
-        };
+        await _context.SaveAsync(GetDocument(client));
+    }
 
-        await _context.SaveAsync(clientDocument);
+    public async Task Delete(Client client)
+    {
+        await _context.DeleteAsync(GetDocument(client));
+    }
+
+    private static ClientDocument GetDocument(Client client)
+    {
+        return new ClientDocument
+        {
+            Id = client.Id.ToString(),
+            Document = client.Document,
+            Name = client.Name,
+            Email = client.Email
+        };
     }
 }

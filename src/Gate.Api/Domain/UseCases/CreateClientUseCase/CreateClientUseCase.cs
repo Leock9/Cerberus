@@ -15,7 +15,7 @@ public class CreateClientUseCase(IClientGateway clientGateway, IAwsSqsGateway aw
 
     public async Task ExecuteAsync(CreateClientInput input)
     {
-        var client = new Client(input.Name, input.Document, input.Email);
+        var client = new Client(input.Name, input.Document, input.Email, input.Address);
 
         var existingClient = await _clientGateway.GetByDocumentAsync(client.Document);
 

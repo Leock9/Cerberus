@@ -1,6 +1,6 @@
 ﻿namespace Gate.Api.Domain;
 
-public record Client(string Name, string Document, string Email, string Id = null)
+public record Client(string Name, string Document, string Email, string Address, string Id = null)
 {
     public string Id { get; init; } = Id ?? Guid.NewGuid().ToString();
 
@@ -12,4 +12,7 @@ public record Client(string Name, string Document, string Email, string Id = nul
 
     public string Email { get; init; } = string.IsNullOrEmpty(Email) || !Email.Contains('@') ?
                                         throw new DomainException("Email is invalid") : Email;
+
+    public string Address { get; init; } = string.IsNullOrEmpty(Address) ? 
+                                            throw new DomainException("Address is required") : Address;
 }

@@ -53,6 +53,7 @@ builder.Services.AddCors(options =>
 // ** USECASES **
 builder.Services.AddScoped<ICreateClientUseCase, CreateClientUseCase>();
 builder.Services.AddScoped<IGetByDocumentUseCase, GetByDocumentUseCase>();
+builder.Services.AddScoped<IDeleteClientUseCase, DeleteClientUseCase>();
 
 // ** GATEWAYS **
 builder.Services.AddSingleton<IClientGateway, DynamoDbClientGateway>();

@@ -1,3 +1,3 @@
 ﻿namespace Gate.Api.Domain;
 
-public record CreateClientInput(string Name, string Document, string Email);
+public record CreateClientInput(string Name, string Document, string Email, string Address);

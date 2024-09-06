@@ -10,7 +10,7 @@ services:
     environment:
       - LOCALSTACK_AUTH_TOKEN="ls-RiFIdoqO-PUpu-FOTO-NaXi-4708XuPA470c"
       - AWS_DEFAULT_REGION=us-east-1
-      - SERVICES=lambda,sns,sqs,s3,cloudformation,cloudwatch,sts,ssm,iam,apigateway,secretsmanager,logs,events,cognito-idp # Para obter lista completa => http GET http://127.0.0.1:4566/_localstack/health
+      - SERVICES=lambda,sns,sqs,s3,cloudformation,cloudwatch,sts,ssm,iam,apigateway,secretsmanager,logs,events,cognito-idp, dynamodb # Para obter lista completa => http GET http://127.0.0.1:4566/_localstack/health
       - EXTRA_CORS_ALLOWED_ORIGINS=https://app.localstack.cloud. # Enable access from the dashboard
     volumes:
       - "./localstack-volume:/var/lib/localstack"
@@ -21,9 +21,21 @@ services:
     ports:
      - "8080:8080"
     build:
-      context: src
+      context: ./src
       dockerfile: Gate.Api/Dockerfile
     environment:
       LocalStack__Config__LocalStackHost: 'localstack'
     depends_on:
+      - localstack
+
+  zap:
+    image: zaproxy/zap-stable
+    command: >
+      zap-api-scan.py -t http://gate.api:8080/v1/swagger.json -f openapi -r api-scan-report.html
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./reports:/zap/reports
+    depends_on:
+      - gate.api
       - localstack

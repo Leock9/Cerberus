@@ -16,4 +16,7 @@ public class ClientDocument
 
     [DynamoDBProperty]
     public string Email { get; set; } = string.Empty;
+
+    [DynamoDBProperty]
+    public string Address { get; set; } = string.Empty;
 }
