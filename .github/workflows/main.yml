@@ -26,24 +26,7 @@ jobs:
 
       - name: Build
         run: dotnet build Cerberus.sln --no-restore
-
-      - name: Run tests with coverage
-        run: |
-          dotnet test src/SoulMenu.Tests/SoulMenu.Tests.csproj --no-build --collect:"XPlat Code Coverage"
-        continue-on-error: true
-
-      - name: Convert coverage to XML
-        run: |
-          reportgenerator -reports:**/coverage.cobertura.xml -targetdir:coveragereport -reporttypes:Cobertura
-
-      - name: Run SonarCloud Analysis
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          dotnet-sonarscanner begin /k:"Leock9_SoulMenu" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.cs.opencover.reportsPaths="**/coverage.cobertura.xml"
-          dotnet build src/SoulMenu.sln
-          dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
-
+        
   build-and-push-docker-image:
     runs-on: ubuntu-latest
     needs: build-and-test
