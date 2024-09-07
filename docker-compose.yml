@@ -1,6 +1,5 @@
 name: gate-api
 services:
-
   localstack:
     container_name: "${LOCALSTACK_DOCKER_NAME-localstack_cerberus}"
     image: localstack/localstack-pro 
@@ -35,7 +34,7 @@ services:
     ports:
       - "8090:8090"
     volumes:
-      - ./reports:/zap/reports
+      - ./reports:/zap/wrk
     depends_on:
       - gate.api
       - localstack
